@@ -1,0 +1,72 @@
+# Evaluación Práctica – AgroTech (Apache Camel)
+
+Prototipo que demuestra 3 patrones de integración:
+
+- **File Transfer:** lee `sensores.csv`, lo copia/mueve y transforma cada fila a JSON.
+- **Shared Database:** inserta lecturas en SQLite (`database/agrotech.db`).
+- **RPC simulado:** `direct:solicitarLectura` ↔ `direct:rpc.obtenerUltimo`.
+
+---
+
+## Requisitos
+- Java 17  
+- Maven  
+- (Opcional) `sqlite3` para consultas a la BD
+
+---
+
+## Estructura mínima del proyecto
+evaluacion-practica-agrotech/
+├─ src/main/java/com/agrotech/{App.java, routes/, model/, service/}
+├─ src/main/resources/application.properties
+├─ sensores/sensores.csv
+├─ input/ output/ processed/
+├─ database/
+└─ pom.xml
+
+---
+
+## Comandos para ejecutar
+
+** 1 Compilar (saltando tests)**
+mvn -Dmaven.test.skip=true package
+
+** 2 Ejecutar con logs visibles**
+mvn exec:java \
+  -Dorg.slf4j.simpleLogger.defaultLogLevel=info \
+  -Dorg.slf4j.simpleLogger.showDateTime=true \
+  -Dorg.slf4j.simpleLogger.log.org.apache.camel=info
+
+** 3 Disparar el flujo de archivo **
+cp sensores/sensores.csv input/sensores.csv
+
+** 4 Verificar la BD SQLite**
+sqlite3 database/agrotech.db 'SELECT * FROM lecturas;'
+
+
+## ¿Qué deberías ver?
+
+**En consola:**
+
+[BOOT] Tabla 'lecturas' lista.
+
+[FILE] Recibido: sensores.csv
+
+[ANALYZER] Insertando ... y Insert OK
+
+[CLIENTE] / [SERVIDOR] del RPC (si el timer de prueba está activo)
+
+**En el filesystem:**
+
+output/sensores.csv (copia)
+
+input/processed/sensores.csv (movido)
+
+
+##Problemas comunes (rápidas)
+
+No ves logs: ejecuta sin -q y con los flags de slf4j (arriba).
+
+RPC responde “Sin datos”: se disparó antes de insertar. Vuelve a copiar el CSV a input/.
+
+“No such table: lecturas”: corre la app primero (bootstrap crea la tabla) y asegúrate de estar en la carpeta del proyecto ""evaluacion-practica-agrotech"" al usar sqlite3.
