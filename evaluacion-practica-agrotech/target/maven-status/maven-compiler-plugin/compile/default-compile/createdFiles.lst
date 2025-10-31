@@ -1,0 +1,5 @@
+com/agrotech/App.class
+com/agrotech/routes/IntegrationRoutes.class
+com/agrotech/service/ServicioAnalitica.class
+com/agrotech/model/Lectura.class
+com/agrotech/service/FieldControlDbReader.class
